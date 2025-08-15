@@ -1,0 +1,28 @@
+services:
+  oracle-db:
+    image: wvbirder/database-enterprise:12.2.0.1-slim
+    user: oracle
+    environment:
+      - DB_SID=ORCLCDB
+      - DB_PDB=ORCLPDB1
+      - DB_PASSWD=eF2fJ9]P2QZa8h5m
+      #   
+    ports:
+      - 1521:1521
+    volumes:
+      - ./init-user.sql:/init-user.sql
+      - oracle-data:/opt/oracle/oradata
+      - oracle-backup:/opt/oracle/backup
+      # - PATH=/u01/app/oracle/product/12.2.0/dbhome_1/bin:$PATH
+    command: >
+      bash -c "sleep 30; sqlplus / as sysdba @/init-user.sql; tail -f /dev/null"
+    healthcheck:
+      # test: ["CMD", "sqlplus", "-L", "orcl/orcl123@//localhost:1521/orclpdb1.localdomain", "@healthcheck.sql"]
+      test: ["CMD-SHELL", "bash -c 'sqlplus -L orcl/eF2fJ9]P2QZa8h5m@//localhost:1521/orclpdb1.localdomain @healthcheck.sql'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  oracle-data:
+  oracle-backup:
