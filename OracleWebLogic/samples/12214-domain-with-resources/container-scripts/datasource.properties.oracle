@@ -1,0 +1,10 @@
+dsname=ccicinsDataSource
+dsdbname=default;create=true
+dsjndiname=ccicinsDataSource ycsysDataSource ybtDataSource ccicinsPrintDataSource
+dsdriver=oracle.jdbc.OracleDriver
+dsurl=jdbc:oracle:thin:@//10.1.5.47:1521/gsitdb
+dsusername=yjclaimSINSdb
+dspassword=QGQ4#45NIQYePWqg
+dstestquery=SQL ISVALID
+dsinitsql=SQL ALTER SESSION SET NLS_DATE_FORMAT='YYYY-MM-DD'
+dsmaxcapacity=1
