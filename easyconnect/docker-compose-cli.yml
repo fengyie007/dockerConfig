@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  easyconnect:
+    image: hagb/docker-easyconnect:cli
+    container_name: easyconnect
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      - "127.0.0.1:1080:1080"
+      - "127.0.0.1:8888:8888"
+    environment:
+      EC_VER: "7.6.3"
+      CLI_OPTS: "-d vpnaddress -u username -p password"
+    stdin_open: true
+    tty: true
+    restart: "no"

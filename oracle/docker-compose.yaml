@@ -1,12 +1,12 @@
 services:
   oracle-db:
-    image: wvbirder/database-enterprise:12.2.0.1-slim
+    image: datarepo/oracle-database-enterprise:12.2.0.1-slim
+    # image: wvbirder/database-enterprise:12.2.0.1-slim
     user: oracle
     environment:
-      - DB_SID=ORCLCDB
-      - DB_PDB=ORCLPDB1
-      - DB_PASSWD=eF2fJ9]P2QZa8h5m
-      #   
+      - DB_SID=ORCL
+      - DB_PDB=ORCL
+      - DB_PASSWD=password
     ports:
       - 1521:1521
     volumes:
@@ -18,7 +18,7 @@ services:
       bash -c "sleep 30; sqlplus / as sysdba @/init-user.sql; tail -f /dev/null"
     healthcheck:
       # test: ["CMD", "sqlplus", "-L", "orcl/orcl123@//localhost:1521/orclpdb1.localdomain", "@healthcheck.sql"]
-      test: ["CMD-SHELL", "bash -c 'sqlplus -L orcl/eF2fJ9]P2QZa8h5m@//localhost:1521/orclpdb1.localdomain @healthcheck.sql'"]
+      test: ["CMD-SHELL", "bash -c 'sqlplus -L orcl/password@//localhost:1521/orclpdb1.localdomain @healthcheck.sql'"]
       interval: 30s
       timeout: 10s
       retries: 5

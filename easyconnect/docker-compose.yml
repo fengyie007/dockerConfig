@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  easyconnect:
+    image: hagb/docker-easyconnect:7.6.7
+    container_name: easyconnect
+    environment:
+      - PASSWORD=1234
+      - URLWIN=1
+    devices:
+      - /dev/net/tun
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ${HOME}/.ecdata:/root
+    ports:
+      - "127.0.0.1:5901:5901"
+      - "127.0.0.1:54530:54530"
+      - "127.0.0.1:1080:1080"
+      - "127.0.0.1:8888:8888"
+    stdin_open: true
+    tty: true
+    restart: "no"
