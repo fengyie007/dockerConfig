@@ -1,0 +1,27 @@
+services:
+  db:
+    image: pgvector/pgvector:0.8.2-pg18-trixie
+    container_name: pgvector_optimized
+    restart: always
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: mydb
+      # 在命名卷下，PG18 默认行为会处理好目录
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_vector_data:/var/lib/postgresql
+    command: >
+      postgres
+      -c shared_buffers=512MB
+      -c work_mem=16MB
+      -c maintenance_work_mem=256MB
+      -c max_parallel_maintenance_workers=4
+      -c max_parallel_workers_per_gather=4
+      -c random_page_cost=1.1
+      -c effective_cache_size=1GB
+    shm_size: '512mb'
+
+volumes:
+  pg_vector_data:

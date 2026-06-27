@@ -1,0 +1,102 @@
+# newapi docker-compose 配置参考：  
+# https://docs.newapi.ai/zh/docs/installation/config-maintenance/docker-compose-yml  
+# 启动的全部服务  
+services:
+# 服务名  
+  new-api:
+# 镜像名  
+    image: calciumion/new-api:latest
+# 容器名  
+    container_name: new-api
+# 退出时总是自动重启，确保服务意外挂掉后能恢复。  
+    restart: always
+# 启动容器后，会执行这个自定义命令，它将应用的日志目录设置为 /app/logs
+    command: --log-dir /app/logs
+# 端口映射
+    ports:  
+      - '3000:3000'  # ❓注意后面的3000不能修改，不然后面的healthcheck心跳检测，检测不到  
+# 卷挂载  
+    volumes:  
+      - ./newapi/data:/data  
+      - ./newapi/logs:/app/logs  
+# 环境变量  
+    environment:  
+      - SQL_DSN=postgresql://root:123456@postgres:5432/new-api # ⚠️ 请修改密码  
+#      - SQL_DSN=root:123456@tcp(mysql:3306)/new-api  # 如果用mysql的话，取消这条注释，并注释上面那条  
+      - REDIS_CONN_STRING=redis://redis  
+# 设置容器时区为上海  
+      - TZ=Asia/Shanghai  
+# 是否启用错误日志记录  
+      - ERROR_LOG_ENABLED=true  
+# 是否启用批量更新 batch update enabled  
+      - BATCH_UPDATE_ENABLED=true  
+#      - STREAMING_TIMEOUT=300  # 流模式无响应超时时间，单位秒，默认120秒，如果出现空补全可以尝试改为更大值  
+#      - SESSION_SECRET=random_string  # 多机部署时设置，必须修改这个随机字符串！！  
+#      - SYNC_FREQUENCY=60  # 如果需要定期数据库同步，请取消注释  
+# 定义启动顺序，它会等待 rpa、redis、postgres 容器启动后，再启动  
+    depends_on:  
+      - redis  
+      - postgres  
+      #- cpa  
+# 心跳检查，在容器内检查，间隔30s，超时时间10s，重复机制3次  
+    healthcheck:  
+# test的内容是向本机（容器内）发送一个请求，如果在响应中找不到success关键字就报错  
+      test:  
+        [  
+          'CMD-SHELL',  
+          "wget -q -O - http://localhost:3000/api/status | grep -o '\"success\":\\s*true' || exit 1",  
+        ]  
+      interval: 30s  
+      timeout: 10s  
+      retries: 3  
+  
+# 下面的同上，不同的参数我再做解释  
+  redis:  
+    image: redis:7-alpine
+    container_name: redis  
+    restart: always  
+  
+  postgres:  
+    image: postgres:15-alpine  
+    container_name: postgres  
+    restart: always  
+    environment:  
+# 数据库用户名  
+      POSTGRES_USER: root # ❓ 设置用户名，改为你自己的  
+# 数据库密码  
+      POSTGRES_PASSWORD: 123456 # ⚠️ 设置密码，改为你自己的  
+# 数据库名  
+      POSTGRES_DB: new-api  
+    volumes:  
+      - pg_data:/var/lib/postgresql/data  
+#    ports:  
+#      - "5432:5432"  # 如果这个服务要对外，需要解开这个注释  
+  
+#  mysql:  
+#    image: mysql:8.2  
+#    container_name: mysql  
+#    restart: always  
+#    environment:  
+#      MYSQL_ROOT_PASSWORD: 123456  # ⚠️ 设置密码，改为你自己的  
+#      MYSQL_DATABASE: new-api  
+#    volumes:  
+#      - mysql_data:/var/lib/mysql  
+#    ports:  
+#      - "3306:3306"  # 如果这个服务要对外，需要解开这个注释  
+  
+# cpa服务  
+ # cpa:  
+ #   image: eceasy/cli-proxy-api:latest  
+ #   container_name: cpa  
+ # #  ports:    
+ # #    - "9999:8317" # ❓因为这次是通过newpai对外提供服务，cpa只是作为认证文件管理工具  
+ #   volumes:    
+ #     - ./cpa/config.yaml:/CLIProxyAPI/config.yaml # 配置文件输出    
+ #     - ./cpa/auths:/root/.cli-proxy-api # 认证文件 config.yaml 中的 ~ 代表主目录，在linux中就是 /root    
+ #     - ./cpa/logs:/CLIProxyAPI/logs # 日志文件输出    
+ #   restart: always  
+  
+# 顶级挂载，避免文件权限问题，挂载地址：/var/lib/docker/volumes/pg_data  
+volumes:  
+  pg_data:  
+#  mysql_data:

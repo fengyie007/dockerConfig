@@ -1,0 +1,9 @@
+services:
+  rhel:
+    image: rhub/rhel7:latest
+    environment:
+      - DB_SID=ORCL
+    volumes:
+      - data:/data
+volumes:
+  data:
