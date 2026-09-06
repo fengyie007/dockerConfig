@@ -1,0 +1,16 @@
+services:
+  doris:
+    image: apache/doris:all-in-one-4.1.3
+    container_name: doris-all-in-one
+    ports:
+      - "8030:8030"  # FE Web UI
+      - "9030:9030"  # FE MySQL Client Port
+      - "8040:8040"  # BE Web UI
+    volumes:
+      - doris_meta:/opt/apache-doris/fe/doris-meta
+      - doris_storage:/opt/apache-doris/be/storage
+    restart: always
+
+volumes:
+  doris_meta:
+  doris_storage:

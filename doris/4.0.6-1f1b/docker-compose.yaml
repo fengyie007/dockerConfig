@@ -1,0 +1,51 @@
+
+networks:
+  doris_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.80.0/24
+
+services:
+  fe:
+    image: apache/doris:fe-4.0.6
+    container_name: doris-fe-win
+    hostname: fe1
+    privileged: true  # 🌟 必须添加：赋予容器访问系统资源的权限
+    ports:
+      - "8030:8030"
+      - "9030:9030"
+      - "9010:9010"
+    environment:
+      - FE_SERVERS=fe1:172.20.80.2:9010
+      - FE_ID=1
+      # 🌟 保持这个参数，它能防止 JVM 误判容器限制
+      - FE_JVM_OPTS=-XX:-UseContainerSupport
+    volumes:
+      - ./doris-data/fe/doris-meta:/opt/apache-doris/fe/doris-meta
+      - ./doris-data/fe/log:/opt/apache-doris/fe/log
+      - ./fe.conf:/opt/apache-doris/fe/conf/fe.conf # 🌟 确保 fe 也挂载了你修改后的配置文件
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw # 🌟 关键修复：挂载 cgroup 目录
+    networks:
+      doris_network:
+        ipv4_address: 172.20.80.2
+
+  be:  # 👈 前面必须有 2 个空格，不能顶格！
+    image: apache/doris:be-4.0.6
+    container_name: doris-be-win
+    hostname: be1
+    ports:
+      - "8040:8040"
+      - "9050:9050"
+    environment:
+      - FE_SERVERS=fe1:172.20.80.2:9010
+      - BE_ADDR=172.20.80.3:9050
+    volumes:
+      - ./fe.conf:/opt/apache-doris/fe/conf/fe.conf
+      - ./doris-data/be/storage:/opt/apache-doris/be/storage
+      - ./doris-data/be/log:/opt/apache-doris/be/log
+    depends_on:
+      - fe
+    networks:
+      doris_network:
+        ipv4_address: 172.20.80.3
