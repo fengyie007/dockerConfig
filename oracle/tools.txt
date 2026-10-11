@@ -5,20 +5,22 @@ sqlplus / as sysdba;
 SELECT name FROM v$database;
 SELECT * FROM USER_TABLES;
 
-ALTER SESSION SET CONTAINER = ORCLPDB1;
+ALTER SESSION SET CONTAINER = ORCLPDB;
 
 create user orcl identified by orcl123;
 
+GRANT CREATE SESSION TO orcl;
+grant connect, resource to orcl;
 
 drop user orcl cascade;
 
+sqlplus orcl/orcl123@//localhost:1521/orclpdb.localdomain
 
-grant connect, resource to orcl;
-
-
-sqlplus orcl/orcl123@//localhost:1521/ORCLCDB
-
-jdbc:oracle:thin:@localhost:1521/orclpdb1.localdomain
+jdbc:oracle:thin:@localhost:1521/orclpdb.localdomain
 
 
 lsnrctl status
+
+
+
+docker run -d  --name oracle12c-slim  -p 1521:1521 -p 5500:5500   -v oracle_data:/ORCL   datarepo/oracle-database-enterprise:12.2.0.1-slim
