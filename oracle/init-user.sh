@@ -16,6 +16,11 @@ CREATE USER orcl IDENTIFIED BY orcl123;
 -- 3. Grant required roles to the new user
 GRANT CREATE SESSION TO orcl;
 GRANT CONNECT, RESOURCE TO orcl;
+GRANT CREATE TABLE TO orcl;
+GRANT CREATE VIEW TO orcl;
+GRANT CREATE SEQUENCE TO orcl;
+GRANT CREATE PROCEDURE TO orcl;
+GRANT CREATE TRIGGER TO orcl;
 
 -- 4. Grant unlimited tablespace quota (highly recommended for new users)
 ALTER USER orcl QUOTA UNLIMITED ON USERS;
