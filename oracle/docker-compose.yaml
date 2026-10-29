@@ -1,32 +1,24 @@
 services:
-  oracle-db:
-    image: datarepo/oracle-database-enterprise:12.2.0.1-slim
-    # image: wvbirder/database-enterprise:12.2.0.1-slim
-    user: oracle
-    environment:
-      - DB_SID=ORCL
-      - DB_PDB=ORCLPDB
-      - DB_PASSWD=orcl123
-      - ORACLE_CHARACTERSET=AL32UTF8
-      - NLS_LANG=AMERICAN_AMERICA.AL32UTF8
+  # Name of the Docker Compose service,dbname FREEPDB1
+  oracle:
+    # Docker Hub image (feel free to change the tag "latest" to any other available one)
+    image: gvenzl/oracle-free:23-slim
+    # Forward Oracle port to localhost
     ports:
-      - 1521:1521
+      - "1521:1521"
+    # Provide passwords and other environment variables to the container
+    environment:
+      ORACLE_PASSWORD: syspass
+      APP_USER: orcl
+      APP_USER_PASSWORD: orcl123
+    # Customize healthcheck script options for startup
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+      start_interval: 5s
+    # Mount a local SQL file to initialize your schema at startup
     volumes:
-      # - ./init-user.sql:/init-user.sql
-      - oracle-data:/opt/oracle/oradata
-      - ./init-user.sh:/opt/oracle/scripts/setup/init-user.sh
-      # - oracle-backup:/opt/oracle/backup
-      # - PATH=/u01/app/oracle/product/12.2.0/dbhome_1/bin:$PATH
-    # command: >
-    #   bash -c "sleep 30; sqlplus / as sysdba @/init-user.sql; tail -f /dev/null"
-    # healthcheck:
-    #   # test: ["CMD", "sqlplus", "-L", "orcl/orcl123@//localhost:1521/orclpdb1.localdomain", "@healthcheck.sql"]
-    #   # test: ["CMD-SHELL", "bash -c 'sqlplus -L orcl/orcl123@//localhost:1521/orclpdb1.localdomain @healthcheck.sql'"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 5
-
-volumes:
-  oracle-data:
-  # oracle-backup:
-  
+      - ./my-init.sql:/container-entrypoint-initdb.d/my-init.sql:ro
