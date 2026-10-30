@@ -1,13 +1,20 @@
 services:
-  # Name of the Docker Compose service,dbname FREEPDB1
+  # Name of the Docker Compose service,default dbname FREEPDB1
+  # https://hub.docker.com/r/gvenzl/oracle-free
   oracle:
     # Docker Hub image (feel free to change the tag "latest" to any other available one)
+    # 23 1.1G
+    # 23-slim 808m
+    # 23-faststart 1.5G
+    # 23-slim-faststart 1.2G
+    # 23-full-faststart 2.6G
     image: gvenzl/oracle-free:23-slim
     # Forward Oracle port to localhost
     ports:
       - "1521:1521"
     # Provide passwords and other environment variables to the container
     environment:
+      ORACLE_DATABASE: orcl
       ORACLE_PASSWORD: syspass
       APP_USER: orcl
       APP_USER_PASSWORD: orcl123
